@@ -6,7 +6,7 @@ on:
   workflow_dispatch:          # manual run button
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   update:
@@ -27,11 +27,18 @@ jobs:
           cat docs/sub-xray.txt docs/sub-sb.txt | base64 -w0 > docs/sub-all.b64
           echo "Fetched $(wc -l < docs/sub-xray.txt) xray lines, $(wc -l < docs/sub-sb.txt) sb lines"
 
-      - name: Commit if changed
+      - name: Push to public sub repo
+        env:
+          SUB_REPO: ${{ secrets.SUB_REPO }}     # e.g. Navidd777/sub-7f3a9c
+          SUB_TOKEN: ${{ secrets.SUB_TOKEN }}   # fine-grained PAT: Contents read/write on sub repo only
         run: |
+          git clone "https://x-access-token:${SUB_TOKEN}@github.com/${SUB_REPO}.git" subrepo
+          cd subrepo
+          mkdir -p docs
+          cp ../docs/sub-xray.txt ../docs/sub-sb.txt ../docs/sub-all.b64 docs/
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/
           git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "chore: refresh subscription $(date -u +%F_%H:%M)"
+          git commit -m "refresh sub $(date -u +%F_%H:%M)"
           git push
