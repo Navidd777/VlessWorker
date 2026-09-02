@@ -1,0 +1,37 @@
+name: Update subscription from worker
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"   # every 6 hours
+  workflow_dispatch:          # manual run button
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch fresh subscription from Cloudflare Worker
+        env:
+          WORKER_BASE: ${{ secrets.WORKER_BASE }}
+          WORKER_UUID: ${{ secrets.WORKER_UUID }}
+        run: |
+          mkdir -p docs
+          curl -fsSL --max-time 60 "$WORKER_BASE/xray/$WORKER_UUID" -o docs/sub-xray.txt
+          curl -fsSL --max-time 60 "$WORKER_BASE/sb/$WORKER_UUID"   -o docs/sub-sb.txt
+          # base64 combined sub for clients that want a single classic sub
+          cat docs/sub-xray.txt docs/sub-sb.txt | base64 -w0 > docs/sub-all.b64
+          echo "Fetched $(wc -l < docs/sub-xray.txt) xray lines, $(wc -l < docs/sub-sb.txt) sb lines"
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: refresh subscription $(date -u +%F_%H:%M)"
+          git push

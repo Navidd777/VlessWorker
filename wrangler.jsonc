@@ -1,0 +1,17 @@
+{
+  "name": "donya2",
+  "compatibility_date": "2026-06-04",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "index.js",
+  "workers_dev": true,
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
+  },
+  "vars": {
+    "UUID": "8c97b4e6-9a9a-52cb-8bed-52452d293107",// Navid "82d53a04-29df-4173-b584-8ffcc11cb98d", // foulad "39236c0c-3810-4529-b62e-8f398d47e450",// Moj "8c569a67-1412-4e28-9e2a-0256d4bf923c", //safari
+    "PROXYIP": "nima.nscl.ir"
+  }
+}

@@ -1,12 +1,15 @@
 {
-  "name": "zizifn",
+  "name": "donya2",
   "version": "1.0.0",
-  "description": "So what?",
   "type": "module",
   "scripts": {
-    "build": "node build.js"
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
-    "esbuild": "^0.20.0"
+    "wrangler": "^4.98.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   }
 }
