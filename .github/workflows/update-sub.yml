@@ -20,12 +20,26 @@ jobs:
           WORKER_BASE: ${{ secrets.WORKER_BASE }}
           WORKER_UUID: ${{ secrets.WORKER_UUID }}
         run: |
+          set -e
+          echo "WORKER_BASE is set: $([ -n "$WORKER_BASE" ] && echo yes || echo NO)"
+          echo "WORKER_UUID is set: $([ -n "$WORKER_UUID" ] && echo yes || echo NO)"
+          echo "Using URL: $WORKER_BASE/xray/$WORKER_UUID"
           mkdir -p docs
-          curl -fsSL --max-time 60 "$WORKER_BASE/xray/$WORKER_UUID" -o docs/sub-xray.txt
-          curl -fsSL --max-time 60 "$WORKER_BASE/sb/$WORKER_UUID"   -o docs/sub-sb.txt
-          # base64 combined sub for clients that want a single classic sub
+          # Plain (unwrapped) links for xray/sb clients that decode base64 subs themselves
+          curl -SfL --retry 3 --retry-delay 5 --max-time 60 \
+            "$WORKER_BASE/xray/$WORKER_UUID" -o sub-xray-raw.txt
+          curl -SfL --retry 3 --retry-delay 5 --max-time 60 \
+            "$WORKER_BASE/sb/$WORKER_UUID"   -o sub-sb-raw.txt
+
+          # Worker returns base64(sub). Clients that want plain text:
+          base64 -d sub-xray-raw.txt > docs/sub-xray.txt
+          base64 -d sub-sb-raw.txt   > docs/sub-sb.txt
+
+          # base64 combined sub for clients that expect a wrapped classic sub
           cat docs/sub-xray.txt docs/sub-sb.txt | base64 -w0 > docs/sub-all.b64
           echo "Fetched $(wc -l < docs/sub-xray.txt) xray lines, $(wc -l < docs/sub-sb.txt) sb lines"
+          echo "--- first 120 chars of sub-xray.txt ---"
+          head -c 120 docs/sub-xray.txt; echo
 
       - name: Push to public sub repo
         env:
