@@ -76,21 +76,10 @@ export default {
    * @param {any} ctx
    */
   async fetch(request, env, ctx) {
-<<<<<<< Updated upstream
-    //console.log("🟢 Worker started, URL:", request.url);
+    console.log("ðŸŸ¢ Worker started, URL:", request.url);
     try {
       const cfg = Config.fromEnv(env);
-      //console.log("🟢 Config loaded, userID:", cfg.userID);
-      const url = new URL(request.url);
-      //console.log(`url: ${url}`, `  cfg: ${cfg}`);
-      //console.log(`[DEBUG] Request: ${request.method} ${url.pathname}`);
-      //console.log(`[DEBUG] Protocol: ${url.protocol}`);
-      //console.log(`[DEBUG] Headers:`, Object.fromEntries(request.headers));
-=======
-    console.log("🟢 Worker started, URL:", request.url);
-    try {
-      const cfg = Config.fromEnv(env);
-      console.log("🟢 Config loaded, userID:", cfg.userID);
+      console.log("ðŸŸ¢ Config loaded, userID:", cfg.userID);
       const url = new URL(request.url);
       console.log(`url: ${url}`, `  cfg: ${cfg}`);
       console.log(`[DEBUG] Request: ${request.method} ${url.pathname}`);
@@ -98,12 +87,11 @@ export default {
       //console.log(`[DEBUG] Headers:`, Object.fromEntries(request.headers));
       const ConnectionHeader = request.headers.get("connection");
       console.log(`[DEBUG] connection: `, ConnectionHeader);
->>>>>>> Stashed changes
       const upgradeHeader = request.headers.get("Upgrade");
       //console.log("upgradeHeader:",upgradeHeader);
       
       if (upgradeHeader && upgradeHeader.toLowerCase() === "websocket") {
-              //console.log("🟢 WebSocket upgrade request detected");
+              //console.log("ðŸŸ¢ WebSocket upgrade request detected");
               if (cfg.socks5.enabled && !parsedSocksCache) {
                 parsedSocksCache = socks5AddressParser(cfg.socks5.address);
               }
@@ -120,12 +108,8 @@ export default {
               //console.log("requestConfig: ",requestConfig ,"\n upgradeHeader: ",upgradeHeader);
               return ProtocolOverWSHandler(request, requestConfig);
       };
-<<<<<<< Updated upstream
-      //if (url.pathname.startsWith(`/xhttp/${cfg.userID}`))
-=======
       if (ConnectionHeader && ConnectionHeader.toLowerCase() === "Keep-Alive" )
         console.log("protocol is : ..xhttp..");
->>>>>>> Stashed changes
         //return ProtocolOverXHTTPHandler(request, requestConfig);
       if (url.pathname === "/scamalytics-lookup") {
         console.log("..scamalytics..");
