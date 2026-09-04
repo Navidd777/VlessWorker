@@ -6,7 +6,7 @@ on:
   workflow_dispatch:          # manual run button
 
 permissions:
-  contents: read
+  contents: write            # push sub files back to this repo
 
 jobs:
   update:
@@ -17,42 +17,28 @@ jobs:
 
       - name: Fetch fresh subscription from Cloudflare Worker
         env:
-          WORKER_BASE: ${{ secrets.WORKER_BASE }}
-          WORKER_UUID: ${{ secrets.WORKER_UUID }}
+          WORKER_BASE: https://donya31.wknavid.workers.dev
+          WORKER_UUID: 8c97b4e6-9a9a-52cb-8bed-52452d293107
         run: |
           set -e
-          echo "WORKER_BASE is set: $([ -n "$WORKER_BASE" ] && echo yes || echo NO)"
-          echo "WORKER_UUID is set: $([ -n "$WORKER_UUID" ] && echo yes || echo NO)"
           echo "Using URL: $WORKER_BASE/xray/$WORKER_UUID"
           mkdir -p docs
-          # Plain (unwrapped) links for xray/sb clients that decode base64 subs themselves
+          # Worker returns base64(sub). Decode to plain vless:// links.
           curl -SfL --retry 3 --retry-delay 5 --max-time 60 \
-            "$WORKER_BASE/xray/$WORKER_UUID" -o sub-xray-raw.txt
+            "$WORKER_BASE/xray/$WORKER_UUID" | base64 -d > docs/sub-xray.txt
           curl -SfL --retry 3 --retry-delay 5 --max-time 60 \
-            "$WORKER_BASE/sb/$WORKER_UUID"   -o sub-sb-raw.txt
-
-          # Worker returns base64(sub). Clients that want plain text:
-          base64 -d sub-xray-raw.txt > docs/sub-xray.txt
-          base64 -d sub-sb-raw.txt   > docs/sub-sb.txt
-
+            "$WORKER_BASE/sb/$WORKER_UUID"   | base64 -d > docs/sub-sb.txt
           # base64 combined sub for clients that expect a wrapped classic sub
           cat docs/sub-xray.txt docs/sub-sb.txt | base64 -w0 > docs/sub-all.b64
           echo "Fetched $(wc -l < docs/sub-xray.txt) xray lines, $(wc -l < docs/sub-sb.txt) sb lines"
-          echo "--- first 120 chars of sub-xray.txt ---"
+          echo "--- first 120 chars ---"
           head -c 120 docs/sub-xray.txt; echo
 
-      - name: Push to public sub repo
-        env:
-          SUB_REPO: ${{ secrets.SUB_REPO }}     # e.g. Navidd777/sub-7f3a9c
-          SUB_TOKEN: ${{ secrets.SUB_TOKEN }}   # fine-grained PAT: Contents read/write on sub repo only
+      - name: Commit sub files to docs/
         run: |
-          git clone "https://x-access-token:${SUB_TOKEN}@github.com/${SUB_REPO}.git" subrepo
-          cd subrepo
-          mkdir -p docs
-          cp ../docs/sub-xray.txt ../docs/sub-sb.txt ../docs/sub-all.b64 docs/
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/
           git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "refresh sub $(date -u +%F_%H:%M)"
+          git commit -m "refresh sub $(date -u +%F_%H:%M) [skip ci]"
           git push
