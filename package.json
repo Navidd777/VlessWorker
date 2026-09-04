@@ -1,16 +1,26 @@
 {
+<<<<<<< Updated upstream
   "name": "donya2",
+=======
+  "name": "donya3",
+>>>>>>> Stashed changes
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
+<<<<<<< Updated upstream
     "build": "node build.js",
+=======
+>>>>>>> Stashed changes
     "deploy": "wrangler deploy"
   },
   "devDependencies": {
     "wrangler": "^4.98.0"
+<<<<<<< Updated upstream
   },
   "dependencies": {
     "dotenv": "^17.4.2"
+=======
+>>>>>>> Stashed changes
   }
 }
