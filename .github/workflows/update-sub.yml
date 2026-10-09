@@ -16,9 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Fetch fresh subscription from Cloudflare Worker
-        env:
-          WORKER_BASE: https://donya3.wknavid.workers.dev
-          WORKER_UUID: 8c97b4e6-9a9a-52cb-8bed-52452d293107
+
         run: |
           set -e
           echo "Using URL: $WORKER_BASE/xray/$WORKER_UUID"
