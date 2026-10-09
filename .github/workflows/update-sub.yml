@@ -1,4 +1,4 @@
-name: Update subscription from worker
+name: Update XHTTP subscription from worker
 
 on:
   schedule:
